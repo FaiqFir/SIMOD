@@ -1,19 +1,14 @@
 <?php
-// =====================================================================
-// auth.php — Login, registrasi, ubah profil depot
-// Aksi (?aksi=...):  masuk | daftar | depot_ubah
-// Dipanggil dari ApiService.masuk / daftar / ubahProfil
-// =====================================================================
+// auth.php — login, registrasi, ubah profil depot
+// Aksi: masuk | daftar | depot_ubah | depot_get
 require_once __DIR__ . '/koneksi.php';
 
 $aksi = aksi();
 
 switch ($aksi) {
 
-    // ------------------------------------------------------------------
     // POST nama_pengguna, kata_sandi
-    // -> data: { pengguna:{id,nama_pengguna,nama_pengelola}, depot:{...} }
-    // ------------------------------------------------------------------
+    // -> { pengguna:{id,nama_pengguna,nama_pengelola}, depot:{...} }
     case 'masuk':
         $nama = wajib('nama_pengguna', 'Nama pengguna');
         $sandi = (string)($_POST['kata_sandi'] ?? '');
@@ -46,11 +41,9 @@ switch ($aksi) {
         ]);
         break;
 
-    // ------------------------------------------------------------------
     // POST nama_pengguna, kata_sandi, nama_pengelola,
     //      nama_depot, alamat, jam_buka, jam_tutup
-    // 1 akun = 1 depot. Hasil sama seperti 'masuk' (langsung login).
-    // ------------------------------------------------------------------
+    // 1 akun = 1 depot; hasil sama seperti 'masuk' (langsung login).
     case 'daftar':
         $namaPengguna = wajib('nama_pengguna', 'Nama pengguna');
         $sandi = (string)($_POST['kata_sandi'] ?? '');
@@ -105,12 +98,9 @@ switch ($aksi) {
         ]);
         break;
 
-    // ------------------------------------------------------------------
     // POST id_depot, nama_pengelola (opsional), nama_depot, alamat,
     //      jam_buka, jam_tutup, notifikasi_stok_menipis,
-    //      notifikasi_sparepart (0/1)
-    // -> data: depot terbaru
-    // ------------------------------------------------------------------
+    //      notifikasi_sparepart (0/1) -> depot terbaru
     case 'depot_ubah':
         $idDepot = depotAktif();
         $namaDepot = wajib('nama_depot', 'Nama depot');
@@ -157,10 +147,7 @@ switch ($aksi) {
         sukses(depotJson($idDepot));
         break;
 
-    // ------------------------------------------------------------------
-    // GET id_depot (via session) -> data depot lengkap
-    // Dipanggil saat auto-login untuk memulihkan data depot lengkap
-    // ------------------------------------------------------------------
+    // GET id_depot -> depot lengkap (dipakai saat auto-login)
     case 'depot_get':
         $idDepot = depotAktif();
         sukses(depotJson($idDepot));

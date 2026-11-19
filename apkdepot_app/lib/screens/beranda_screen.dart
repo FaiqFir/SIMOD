@@ -1,9 +1,7 @@
 // screens/beranda_screen.dart
-// Berisi 2 hal:
-//   1. BerandaScreen  = kerangka utama aplikasi (bottom navbar 4 menu:
-//                       Beranda, Transaksi, Produk, Laporan)
-//   2. _BerandaTab    = isi halaman Beranda (hasil upgrade desain)
-// Data diambil dari ApiService.beranda() (laporan.php?aksi=beranda).
+// BerandaScreen = kerangka utama (bottom navbar 4 menu).
+// _BerandaTab = isi halaman Beranda.
+// Data dari ApiService.beranda().
 import 'package:flutter/material.dart';
 
 import '../api_service.dart';
@@ -15,9 +13,7 @@ import 'laporan_screen.dart';
 import 'profil_screen.dart';
 import '../services/profile_image_service.dart';
 
-// =====================================================================
 // KERANGKA UTAMA + BOTTOM NAVBAR
-// =====================================================================
 class BerandaScreen extends StatefulWidget {
   const BerandaScreen({super.key});
 
@@ -130,10 +126,8 @@ class _BerandaScreenState extends State<BerandaScreen> {
   }
 }
 
-// =====================================================================
-// PEMBANTU TAMPILAN
-// =====================================================================
-/// 785000 -> "785.000"
+// Pembantu tampilan
+// Format rupiah: 785000 -> "785.000"
 String _rupiah(num n) {
   final negatif = n < 0;
   final s = n.abs().round().toString();
@@ -150,7 +144,7 @@ num _angka(dynamic v) {
   return num.tryParse(v?.toString() ?? '') ?? 0;
 }
 
-/// 'HH:mm' atau 'HH:mm:ss' -> menit sejak tengah malam (null jika gagal)
+// 'HH:mm' atau 'HH:mm:ss' -> menit sejak tengah malam
 int? _menit(String jam) {
   final p = jam.split(':');
   if (p.length < 2) return null;
@@ -177,9 +171,7 @@ const Map<JenisAksi, IconData> _ikonAksi = {
   JenisAksi.kembalikanGalon: Icons.assignment_return_outlined,
 };
 
-// =====================================================================
 // ISI HALAMAN BERANDA
-// =====================================================================
 class _BerandaTab extends StatefulWidget {
   final ValueNotifier<int> segarkan;
   final void Function(JenisAksi) onAksi;
@@ -256,10 +248,10 @@ class _BerandaTabState extends State<_BerandaTab> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // ---------------- HEADER ----------------
+          // HEADER
           SliverToBoxAdapter(child: _header(depot)),
 
-          // ---------------- ISI ----------------
+          // ISI
           if (_memuat && _data == null)
             const SliverFillRemaining(
               hasScrollBody: false,
@@ -305,7 +297,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ------------------------------------------------------------------
   Widget _header(DepotModel? depot) {
     final sekarang = TimeOfDay.now();
     final menitSekarang = sekarang.hour * 60 + sekarang.minute;
@@ -485,7 +476,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ------------------------------------------------------------------
   Widget _kartuOmset(Map<String, dynamic> d) {
     final masuk = _angka(d['pemasukan_hari_ini']);
     final keluar = _angka(d['pengeluaran_hari_ini']);
@@ -638,7 +628,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ------------------------------------------------------------------
   Widget _judul(String teks, {double ruangAtas = 0}) {
     return Padding(
       padding: EdgeInsets.only(top: ruangAtas, bottom: 10),
@@ -746,7 +735,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ------------------------------------------------------------------
   Widget _gridAksi() {
     final aksi = JenisAksi.values;
     return GridView.builder(
@@ -807,9 +795,7 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ------------------------------------------------------------------
   // Konfirmasi status selesai -> simpan di server -> tampilkan popup sukses.
-  // ------------------------------------------------------------------
   Future<void> _konfirmasiSelesai(Map<String, dynamic> pengingat) async {
     final id = pengingat['id']?.toString() ?? '';
     final nama = (pengingat['nama_produk'] ?? 'Tugas ini').toString();
@@ -902,7 +888,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     }
   }
 
-  // ------------------------------------------------------------------
   Widget _daftarPengingat(Map<String, dynamic> d) {
     final raw = d['pengingat'];
     final list = raw is List ? raw : const [];
@@ -1100,7 +1085,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ------------------------------------------------------------------
   Widget _tampilanError() {
     return Padding(
       padding: const EdgeInsets.all(32),

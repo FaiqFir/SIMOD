@@ -1,8 +1,8 @@
-// screens/produk_screen.dart
-// Tab "Produk" (Manajemen Produk):
-//   - Tab "Daftar"   : kartu stok (Ubah Stok) + daftar produk (edit / hapus)
-//   - Tab "Catatan"  : daftar peminjam yang masih membawa galon
-//   - FormProdukScreen : tambah / ubah produk
+// produk_screen.dart
+// Tab Produk (Manajemen Produk):
+// - Tab "Daftar": kartu stok + daftar produk (edit/hapus)
+// - Tab "Catatan": peminjam yang belum mengembalikan galon
+// - FormProdukScreen: tambah/ubah produk
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,9 +16,7 @@ String _masaPakai(int hari) {
   return '$hari hari';
 }
 
-// =====================================================================
 // TAB PRODUK
-// =====================================================================
 class ProdukScreen extends StatefulWidget {
   const ProdukScreen({super.key});
 
@@ -83,7 +81,6 @@ class _ProdukScreenState extends State<ProdukScreen> {
     }
   }
 
-  // ------------------------------------------------------------------
   Future<void> _bukaForm([ProdukModel? produk]) async {
     final ok = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => FormProdukScreen(produk: produk)),
@@ -309,7 +306,6 @@ class _ProdukScreenState extends State<ProdukScreen> {
     }
   }
 
-  // ------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -434,9 +430,7 @@ class _ProdukScreenState extends State<ProdukScreen> {
     );
   }
 
-  // =================================================================
   // TAB DAFTAR
-  // =================================================================
   Widget _tabDaftar() {
     final tampil = _filter == null
         ? _produk
@@ -695,9 +689,7 @@ class _ProdukScreenState extends State<ProdukScreen> {
     );
   }
 
-  // =================================================================
   // TAB CATATAN (peminjam yang belum mengembalikan galon)
-  // =================================================================
   Widget _tabCatatan() {
     final q = _cari.toLowerCase();
     final tampil = q.isEmpty
@@ -867,9 +859,7 @@ class _ProdukScreenState extends State<ProdukScreen> {
   }
 }
 
-// =====================================================================
 // FORM TAMBAH / UBAH PRODUK
-// =====================================================================
 class FormProdukScreen extends StatefulWidget {
   /// null = tambah produk baru, isi = ubah produk
   final ProdukModel? produk;

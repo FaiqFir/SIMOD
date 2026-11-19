@@ -1,7 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Wrapper aman untuk menyimpan token/credential login.
-/// Menggunakan flutter_secure_storage (encrypted di Android Keystore / iOS Keychain).
+/// Menyimpan data sesi login di Android Keystore / iOS Keychain.
 class SecureStorageService {
   SecureStorageService._();
   static final SecureStorageService instance = SecureStorageService._();

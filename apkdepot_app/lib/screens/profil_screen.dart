@@ -102,6 +102,43 @@ class _ProfilScreenState extends State<ProfilScreen> {
     }
   }
 
+  Future<void> _hapusFotoProfil() async {
+    final yakin = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'Hapus Foto Profil?',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+        content: const Text(
+          'Foto profil akan dihapus dan kembali ke inisial nama.',
+          style: TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(
+                color: WarnaMod.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (yakin != true || !mounted) return;
+
+    await ProfileImageService.instance.clear();
+    // setState dipanggil via listener
+    if (mounted) tampilSnack(context, 'Foto profil dihapus', error: false);
+  }
+
   Future<void> _editTeks({
     required String judul,
     required TextEditingController controller,
@@ -361,6 +398,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     Center(
                       child: GestureDetector(
                         onTap: _pilihFotoProfil,
+                        onLongPress: ProfileImageService.instance.hasImage
+                            ? _hapusFotoProfil
+                            : null,
                         child: Stack(
                           alignment: Alignment.bottomRight,
                           children: [
@@ -404,6 +444,33 @@ class _ProfilScreenState extends State<ProfilScreen> {
                                 color: Colors.white,
                               ),
                             ),
+                            if (ProfileImageService.instance.hasImage)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: _hapusFotoProfil,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: WarnaMod.error,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: WarnaMod.error.withOpacity(0.35),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete_rounded,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

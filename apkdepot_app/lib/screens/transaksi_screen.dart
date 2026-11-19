@@ -1,9 +1,8 @@
-// screens/transaksi_screen.dart
-// Isi file ini:
-//   1. TransaksiScreen        = tab "Transaksi": grid 9 aksi + transaksi terbaru
-//   2. FormTransaksiScreen    = satu form untuk 9 aksi (field menyesuaikan aksi)
-//   3. DaftarTransaksiScreen  = riwayat lengkap + filter + detail + batalkan
-// Semua data lewat ApiService; layar hanya mengurus tampilan.
+// transaksi_screen.dart
+// Tab Transaksi: grid 9 aksi + transaksi terbaru
+// FormTransaksiScreen: satu form untuk 9 aksi
+// DaftarTransaksiScreen: riwayat lengkap + filter + detail + batalkan
+// Data lewat ApiService; layar hanya mengurus tampilan.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,9 +10,7 @@ import '../api_service.dart';
 import '../models.dart';
 import 'login_screen.dart'; // WarnaMod, TombolUtama, LabelInput, dekorInput, ...
 
-// =====================================================================
-// PEMBANTU BERSAMA
-// =====================================================================
+// Pembantu bersama
 const Map<JenisAksi, IconData> ikonAksi = {
   JenisAksi.isiUlang: Icons.autorenew_rounded,
   JenisAksi.beliGalonKosong: Icons.add_circle_outline_rounded,
@@ -26,7 +23,7 @@ const Map<JenisAksi, IconData> ikonAksi = {
   JenisAksi.kembalikanGalon: Icons.assignment_return_outlined,
 };
 
-/// 785000 -> "785.000"
+/// Format rupiah: 785000 -> "785.000"
 String formatRupiah(num n) {
   final negatif = n < 0;
   final s = n.abs().round().toString();
@@ -59,9 +56,7 @@ Color _warnaTransaksi(TransaksiModel t) {
   return t.pemasukan ? const Color(0xFF2E9E5B) : WarnaMod.error;
 }
 
-// =====================================================================
 // 1. TAB TRANSAKSI
-// =====================================================================
 class TransaksiScreen extends StatefulWidget {
   /// Diisi dari grid "Aksi Cepat" di Beranda -> form langsung terbuka
   final ValueNotifier<JenisAksi?>? aksiDipilih;
@@ -304,9 +299,7 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
   }
 }
 
-// =====================================================================
 // BARIS TRANSAKSI (dipakai di tab dan di daftar lengkap)
-// =====================================================================
 class ItemTransaksi extends StatelessWidget {
   final TransaksiModel t;
   final VoidCallback onTap;
@@ -451,10 +444,8 @@ class ItemTransaksi extends StatelessWidget {
   }
 }
 
-// =====================================================================
 // DETAIL TRANSAKSI + BATALKAN
 // Mengembalikan true kalau ada perubahan (transaksi dibatalkan)
-// =====================================================================
 Future<bool> bukaDetailTransaksi(BuildContext context, TransaksiModel t) async {
   final hasil = await showModalBottomSheet<bool>(
     context: context,
@@ -735,9 +726,7 @@ class _DetailTransaksiSheetState extends State<_DetailTransaksiSheet> {
   }
 }
 
-// =====================================================================
 // 3. DAFTAR TRANSAKSI (riwayat lengkap)
-// =====================================================================
 class DaftarTransaksiScreen extends StatefulWidget {
   const DaftarTransaksiScreen({super.key});
 
@@ -824,7 +813,7 @@ class _DaftarTransaksiScreenState extends State<DaftarTransaksiScreen> {
       appBar: appBarMod('Daftar Transaksi'),
       body: Column(
         children: [
-          // ---- filter ----
+          // filter
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
@@ -889,7 +878,7 @@ class _DaftarTransaksiScreenState extends State<DaftarTransaksiScreen> {
               ],
             ),
           ),
-          // ---- ringkasan ----
+          // ringkasan
           if (!_memuat && _error == null && _data.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -901,7 +890,7 @@ class _DaftarTransaksiScreenState extends State<DaftarTransaksiScreen> {
                 ],
               ),
             ),
-          // ---- daftar ----
+          // daftar
           Expanded(
             child: RefreshIndicator(
               onRefresh: _muat,
@@ -1025,9 +1014,7 @@ class _DaftarTransaksiScreenState extends State<DaftarTransaksiScreen> {
   }
 }
 
-// =====================================================================
 // 2. FORM TRANSAKSI (9 aksi, field menyesuaikan jenis aksi)
-// =====================================================================
 class FormTransaksiScreen extends StatefulWidget {
   final JenisAksi aksi;
   const FormTransaksiScreen({super.key, required this.aksi});
@@ -1059,7 +1046,7 @@ class _FormTransaksiScreenState extends State<FormTransaksiScreen> {
 
   JenisAksi get _aksi => widget.aksi;
 
-  // ---------- konfigurasi per aksi ----------
+  // konfigurasi per aksi
   JenisProduk? get _jenisProduk => switch (_aksi) {
     JenisAksi.isiUlang || JenisAksi.pinjamGalonIsi => JenisProduk.jenisAir,
     JenisAksi.beliGalonKosong => JenisProduk.galonKosong,
@@ -1112,7 +1099,7 @@ class _FormTransaksiScreenState extends State<FormTransaksiScreen> {
   int? get _maksJumlah =>
       _kembali ? _peminjamDipilih?.jumlahGalonDipinjam : null;
 
-  // ---------- siklus hidup ----------
+  // siklus hidup
   @override
   void initState() {
     super.initState();
@@ -1154,7 +1141,7 @@ class _FormTransaksiScreenState extends State<FormTransaksiScreen> {
     if (mounted) setState(() => _memuat = false);
   }
 
-  // ---------- peminjam baru (quick-add) ----------
+  // peminjam baru (quick-add)
   Future<void> _tambahPeminjamBaru() async {
     final namaCtrl = TextEditingController();
     final alamatCtrl = TextEditingController();
@@ -1234,7 +1221,7 @@ class _FormTransaksiScreenState extends State<FormTransaksiScreen> {
     if (mounted && _peminjamDipilih == null) setState(() => _resetPeminjam++);
   }
 
-  // ---------- simpan ----------
+  // simpan
   Future<void> _simpan() async {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
@@ -1265,7 +1252,7 @@ class _FormTransaksiScreenState extends State<FormTransaksiScreen> {
     }
   }
 
-  // ---------- potongan tampilan ----------
+  // potongan tampilan
   Widget _dropdownProduk() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

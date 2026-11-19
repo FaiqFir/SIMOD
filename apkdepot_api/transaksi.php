@@ -1,13 +1,7 @@
 <?php
-// =====================================================================
-// transaksi.php — Pusat integrasi: 9 aksi transaksi, riwayat, detail, pembatalan
-// Aksi (?aksi=...):
-//   isi_ulang | beli_galon_kosong | galon_kosong_isi | beli_es | pinjam_galon_isi
-//   catat_pengeluaran | pendapatan_lain | ganti_sparepart | kembalikan_galon
-//   riwayat | detail | batalkan
-// Setiap aksi mencatat transaksi + efek stok + efek peminjam dalam SATU
+// transaksi.php — 9 aksi transaksi, riwayat, detail, pembatalan.
+// Setiap aksi mencatat transaksi + efek stok + efek peminjam dalam satu
 // transaksi database: kalau salah satu gagal, semuanya dibatalkan.
-// =====================================================================
 require_once __DIR__ . '/koneksi.php';
 
 const BATAS_JUMLAH = 100000;
@@ -125,9 +119,7 @@ $pdo = db();
 
 switch ($aksi) {
 
-    // ==================================================================
     // 1. ISI ULANG — id_produk (jenis_air), jumlah | stok tidak berubah | pemasukan
-    // ==================================================================
     case 'isi_ulang':
         $p = ambilProduk($idDepot, 'jenis_air', 'Jenis air');
         $jumlah = inputInt('jumlah', 'Jumlah', 1);
@@ -140,9 +132,7 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 2. BELI GALON — id_produk (galon_kosong), jumlah | stok galon kosong −jumlah | pemasukan
-    // ==================================================================
     case 'beli_galon_kosong':
         $p = ambilProduk($idDepot, 'galon_kosong', 'Galon kosong');
         $jumlah = inputInt('jumlah', 'Jumlah', 1);
@@ -157,10 +147,8 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 3. BELI GALON + ISI — id_produk (galon_kosong_isi), jumlah
     //    stok galon kosong −jumlah (produk Galon Kosong utama depot) | pemasukan
-    // ==================================================================
     case 'galon_kosong_isi':
         $p = ambilProduk($idDepot, 'galon_kosong_isi', 'Galon kosong + isi');
         $jumlah = inputInt('jumlah', 'Jumlah', 1);
@@ -176,9 +164,7 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 4. BELI ES — id_produk (es), jumlah | stok es −jumlah | pemasukan
-    // ==================================================================
     case 'beli_es':
         $p = ambilProduk($idDepot, 'es', 'Jenis es');
         $jumlah = inputInt('jumlah', 'Jumlah', 1);
@@ -193,11 +179,9 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 5. PINJAM GALON + ISI — id_produk (jenis_air), jumlah,
-    //    id_peminjam ATAU nama+alamat (find-or-create, spec §6.2)
+    //    id_peminjam ATAU nama+alamat (find-or-create)
     //    stok galon kosong −jumlah, galon dipinjam +jumlah | pemasukan
-    // ==================================================================
     case 'pinjam_galon_isi':
         $p = ambilProduk($idDepot, 'jenis_air', 'Jenis air');
         $jumlah = inputInt('jumlah', 'Jumlah', 1);
@@ -232,9 +216,7 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 6 & 7. PENGELUARAN / PENDAPATAN LAINNYA — deskripsi, nominal, catatan
-    // ==================================================================
     case 'catat_pengeluaran':
     case 'pendapatan_lain':
         $deskripsi = (string)wajib('deskripsi', 'Deskripsi');
@@ -249,11 +231,9 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 8. GANTI SPAREPART — id_produk (sparepart), biaya (opsional)
     //    terakhir_diganti -> hari ini | pengeluaran bila ada biaya
     //    (tanggal lama disimpan di kolom deskripsi agar bisa dipulihkan saat dibatalkan)
-    // ==================================================================
     case 'ganti_sparepart':
         $p = ambilProduk($idDepot, 'sparepart', 'Sparepart');
         $biaya = input('biaya') === null ? 0.0 : inputUang('biaya', 'Biaya', false);
@@ -269,10 +249,8 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // 9. KEMBALI GALON — id_peminjam (wajib sudah ada), jumlah ≤ yang dipinjam
     //    galon dipinjam −jumlah, stok galon kosong +jumlah | tanpa efek uang
-    // ==================================================================
     case 'kembalikan_galon':
         $idPeminjamIn = (string)wajib('id_peminjam', 'Peminjam');
         $jumlah = inputInt('jumlah', 'Jumlah', 1);
@@ -293,10 +271,8 @@ switch ($aksi) {
         });
         break;
 
-    // ==================================================================
     // RIWAYAT — GET [dari], [sampai], [jenis_aksi], [limit]
     // Menyertakan transaksi yang dibatalkan (ditandai status = dibatalkan)
-    // ==================================================================
     case 'riwayat':
         $sql = 'SELECT t.id, t.jenis_aksi, t.id_produk, p.nama_produk, t.id_peminjam, m.nama AS nama_peminjam,
                        t.deskripsi, t.jumlah, t.harga_satuan, t.total, t.tipe_arus_kas, t.status,
@@ -337,11 +313,9 @@ switch ($aksi) {
         sukses($t);
         break;
 
-    // ==================================================================
-    // BATALKAN — POST id, alasan (spec §6.3)
+    // BATALKAN — POST id, alasan
     // Baris tidak dihapus: ditandai dibatalkan, efek stok & peminjam dibalik.
     // Ditolak bila pembalikan membuat stok / pinjaman menjadi minus.
-    // ==================================================================
     case 'batalkan':
         $id = (string)wajib('id', 'ID transaksi');
         $alasan = (string)input('alasan', 'Dibatalkan oleh pengguna');

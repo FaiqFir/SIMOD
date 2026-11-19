@@ -1,15 +1,12 @@
-// screens/login_screen.dart
-// Layar Login + Registrasi (dua kelas dalam satu file, sesuai hierarki file).
-// Layar hanya mengurus tampilan; semua data lewat ApiService.
+// Login + Registrasi (dua kelas dalam satu file).
+// Layar hanya mengurus tampilan; data lewat ApiService.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../api_service.dart';
 import 'beranda_screen.dart';
 
-// ---------------------------------------------------------------------
-// Warna & gaya bersama (diambil dari mockup)
-// ---------------------------------------------------------------------
+// Warna & gaya bersama.
 class WarnaMod {
   static const Color biru = Color(0xFF2196F3);
   static const Color biruTua = Color(0xFF0D47A1);
@@ -27,7 +24,7 @@ class WarnaMod {
   );
 }
 
-// Tombol biru utama: gelap saat ditekan / di-hover (sesuai "Login-Hover Masuk")
+// Tombol biru utama: gelap saat ditekan/di-hover.
 class TombolUtama extends StatelessWidget {
   final String teks;
   final bool memuat;
@@ -85,7 +82,7 @@ class TombolUtama extends StatelessWidget {
   }
 }
 
-// Label kecil tebal di atas kolom isian
+// Label tebal di atas kolom isian.
 class LabelInput extends StatelessWidget {
   final String teks;
   const LabelInput(this.teks);
@@ -139,9 +136,7 @@ void tampilSnack(BuildContext context, String pesan, {bool error = true}) {
     );
 }
 
-// =====================================================================
 // LOGIN
-// =====================================================================
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -203,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 24),
-                    // ---- Logo ----
+                    // Logo
                     Center(
                       child: Container(
                         width: 64,
@@ -248,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 36),
 
-                    // ---- Nama pengguna ----
+                    // Nama pengguna
                     const LabelInput('Nama Pengguna'),
                     TextFormField(
                       controller: _namaCtrl,
@@ -261,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // ---- Kata sandi ----
+                    // Kata sandi
                     const LabelInput('Kata Sandi'),
                     TextFormField(
                       controller: _sandiCtrl,
@@ -333,9 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// =====================================================================
 // REGISTRASI AKUN BARU (Data Akun Pengelola + Data Depot Air)
-// =====================================================================
 class RegistrasiScreen extends StatefulWidget {
   const RegistrasiScreen({super.key});
 
@@ -594,10 +587,8 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
   }
 }
 
-// =====================================================================
-// AppBar biru bergradasi — dipakai semua layar (Transaksi, Produk, dst.)
-// Tombol kembali muncul otomatis kalau layar dibuka lewat Navigator.push.
-// =====================================================================
+// AppBar biru bergradasi — dipakai semua layar.
+// Tombol kembali otomatis kalau dibuka lewat Navigator.push.
 PreferredSizeWidget appBarMod(String judul, {List<Widget>? aksi}) {
   return AppBar(
     elevation: 0,

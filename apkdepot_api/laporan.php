@@ -1,17 +1,9 @@
 <?php
-// =====================================================================
-// laporan.php — Beranda, Laporan (harian / ringkasan / ekspor), Pengingat
-// Aksi (?aksi=...):
-//   beranda | harian | ringkasan | ekspor
-//   pengingat_list | pengingat_ubah | pengingat_cek
-// Semua angka uang hanya menghitung transaksi berstatus 'aktif' (spec §6.5).
-// =====================================================================
+// laporan.php — beranda, laporan harian/ringkasan, ekspor CSV, pengingat
+// Angka uang hanya menghitung transaksi berstatus 'aktif'.
 require_once __DIR__ . '/koneksi.php';
 
-/**
- * Total pemasukan/pengeluaran transaksi aktif pada rentang [$awal, $akhir] (tanggal inklusif).
- * Mengembalikan angka dalam format yang dibaca laporan_screen.dart.
- */
+/** Total pemasukan/pengeluaran transaksi aktif pada rentang [awal, akhir]. */
 function totalRentang(string $idDepot, string $awal, string $akhir): array
 {
     $st = db()->prepare(
@@ -86,9 +78,7 @@ $pdo = db();
 
 switch ($aksi) {
 
-    // ==================================================================
     // BERANDA — kartu omset hari ini, ringkasan stok, pengingat
-    // ==================================================================
     case 'beranda':
         $hariIni = date('Y-m-d');
         $tot = totalRentang($idDepot, $hariIni, $hariIni);
@@ -118,10 +108,8 @@ switch ($aksi) {
         ]);
         break;
 
-    // ==================================================================
     // HARIAN — GET tanggal (yyyy-MM-dd)
     // Grafik selalu berisi 24 titik (00:00 sampai 23:00), termasuk jam kosong.
-    // ==================================================================
     case 'harian':
         $tgl = cekTanggal(input('tanggal', date('Y-m-d')));
         $hasil = totalRentang($idDepot, $tgl, $tgl);
@@ -157,11 +145,9 @@ switch ($aksi) {
         sukses($hasil);
         break;
 
-    // ==================================================================
     // RINGKASAN — GET periode (minggu|bulan|tahun), tanggal
     //  minggu = Senin–Minggu yang memuat tanggal itu; bulan & tahun sesuai kalender
     //  grafik_harian = [{tanggal, pemasukan, pengeluaran}] per hari yang ada transaksinya
-    // ==================================================================
     case 'ringkasan':
         $periode = (string)input('periode', 'bulan');
         $tgl = new DateTimeImmutable(cekTanggal(input('tanggal', date('Y-m-d'))));
@@ -209,10 +195,8 @@ switch ($aksi) {
         sukses($hasil);
         break;
 
-    // ==================================================================
     // EKSPOR — GET dari, sampai -> unduhan CSV (dibuka di tab baru oleh Flutter)
     // Pemisah ';' + BOM UTF-8 agar langsung rapi di Excel versi Indonesia
-    // ==================================================================
     case 'ekspor':
         $sampai = cekTanggal(input('sampai', date('Y-m-d')), 'Tanggal sampai');
         $dari = cekTanggal(input('dari', date('Y-m-01')), 'Tanggal dari');
@@ -253,9 +237,7 @@ switch ($aksi) {
         fclose($out);
         exit;
 
-    // ==================================================================
     // PENGINGAT
-    // ==================================================================
 
     // GET [status] — kosong = semua
     case 'pengingat_list':

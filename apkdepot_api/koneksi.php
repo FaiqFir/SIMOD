@@ -1,24 +1,21 @@
 <?php
-// =====================================================================
-// koneksi.php — Koneksi database + fungsi pembantu yang dipakai semua file
-// Letakkan di: E:\laragon\www\apkdepot_api\koneksi.php
-// File lain cukup:  require_once 'koneksi.php';
-// =====================================================================
+// koneksi.php — koneksi database + fungsi pembantu yang dipakai semua file
+// Taruh di folder yang sama dengan file API lain.
 
-// ---- Pengaturan database (Laragon bawaan: user root, tanpa sandi) ----
+// Pengaturan database
 const DB_HOST = '127.0.0.1';
 const DB_NAMA = 'apkdepot';
 const DB_USER = 'depot';
 const DB_PASS = 'depot123';
 
-// Zona waktu Palu (WITA). Dipakai PHP dan MySQL supaya tanggal "hari ini" sama.
+// WITA — disamakan dengan time_zone MySQL
 date_default_timezone_set('Asia/Makassar');
 
-// Jangan tampilkan error PHP mentah (merusak JSON). Error dicatat di log saja.
+// Error PHP tidak ditampilkan agar balasan JSON tetap valid
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
-// ---- Header CORS (agar Flutter Web di Chrome boleh memanggil API) ----
+// CORS untuk Flutter Web
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -27,11 +24,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     exit;
 }
 
-// =====================================================================
-// Balasan JSON — format yang dibaca api_service.dart:
-//   sukses : {"status":"sukses","data":...}
-//   gagal  : {"status":"error","message":"..."}
-// =====================================================================
+// Balasan JSON: sukses {"status":"sukses","data":...} | gagal {"status":"error","message":"..."}
 function kirimJson($payload, int $kode = 200): void
 {
     if (!headers_sent()) {
@@ -66,9 +59,7 @@ set_exception_handler(function (Throwable $e) {
     gagal('Terjadi kesalahan pada server. Cek log PHP / pastikan database "' . DB_NAMA . '" sudah diimpor.', 500);
 });
 
-// =====================================================================
 // Koneksi PDO (satu koneksi per permintaan)
-// =====================================================================
 function db(): PDO
 {
     static $pdo = null;
@@ -93,9 +84,7 @@ function db(): PDO
     return $pdo;
 }
 
-// =====================================================================
 // Fungsi pembantu umum
-// =====================================================================
 
 /** UUID v4 untuk kolom id CHAR(36) */
 function uuid(): string
@@ -186,11 +175,7 @@ function cekJam(?string $j, string $label): string
     return sprintf('%02d:%02d:%02d', (int)$p[0], (int)$p[1], (int)($p[2] ?? 0));
 }
 
-/**
- * Pastikan id_depot yang dikirim Flutter ada di database.
- * (Aplikasi ini belum memakai token; id_depot dikirim di setiap permintaan.)
- * Mengembalikan id_depot.
- */
+/** Pastikan id_depot valid. Mengembalikan id_depot. */
 function depotAktif(): string
 {
     $id = input('id_depot');
@@ -235,14 +220,8 @@ function aksi(): string
     return (string)$a;
 }
 
-// =====================================================================
-// Pengingat (spec §6.4) — dipanggil dari transaksi.php, produk.php, laporan.php
-//  - stok galon_kosong / es <= ambang  -> pengingat stok_menipis
-//  - sparepart: hari ini >= jatuh_tempo - 7 hari -> sparepart_jatuh_tempo
-//  - pengingat yang masalahnya sudah beres otomatis ditandai 'selesai'
-//  - tidak membuat duplikat selama pengingat sejenis masih belum_dibaca/dibaca
-//  - mengikuti toggle notifikasi di Profil
-// =====================================================================
+// Pengingat stok menipis & sparepart jatuh tempo.
+// Sesuai toggle notifikasi di Profil; pengingat yang sudah beres ditandai 'selesai'.
 function periksaPengingat(string $idDepot): void
 {
     $pdo = db();
@@ -324,10 +303,7 @@ function periksaPengingat(string $idDepot): void
     }
 }
 
-/**
- * Daftar pengingat, mengikuti toggle Profil.
- * $status kosong = semua status (atau hanya yang belum 'selesai' bila $hanyaTerbuka).
- */
+/** Daftar pengingat sesuai toggle di Profil. $status kosong = semua status. */
 function daftarPengingatJson(string $idDepot, ?string $status = null, bool $hanyaTerbuka = false): array
 {
     $sql = "SELECT g.id, g.jenis, g.id_produk, p.nama_produk, g.pesan, g.status, g.dibuat_pada
@@ -353,13 +329,10 @@ function daftarPengingatJson(string $idDepot, ?string $status = null, bool $hany
     return $st->fetchAll();
 }
 
-// =====================================================================
-// Stok — satu-satunya pintu untuk mengubah angka stok (spec §6.2).
-// Harus dipanggil di dalam transaksi database milik pemanggil.
-//  - stok tidak boleh minus (ditolak dengan pesan jelas)
-//  - setiap perubahan dicatat di pergerakan_stok
+// Stok — satu-satunya pintu mengubah angka stok.
+// Dipanggil di dalam transaksi database; stok tidak boleh minus dan
+// setiap perubahan dicatat di pergerakan_stok.
 // Mengembalikan jumlah stok setelah perubahan.
-// =====================================================================
 function ubahStok(string $idProduk, int $perubahan, ?string $idTransaksi, string $jenisPergerakan, ?string $keterangan = null): int
 {
     $pdo = db();

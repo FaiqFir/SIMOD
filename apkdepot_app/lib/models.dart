@@ -208,16 +208,6 @@ class ProdukModel {
       'terakhir_diganti': formatTanggalKirim(terakhirDiganti!),
     if (jenis.punyaStok) 'ambang_stok_minimum': ambangStokMinimum,
   };
-
-  /// Perkiraan tanggal jatuh tempo penggantian (khusus sparepart)
-  DateTime? get jatuhTempo {
-    if (jenis != JenisProduk.sparepart ||
-        terakhirDiganti == null ||
-        masaPakaiHari == null) {
-      return null;
-    }
-    return terakhirDiganti!.add(Duration(days: masaPakaiHari!));
-  }
 }
 
 /// Angka stok per produk (tabel `stok` digabung dengan data produknya)
@@ -278,9 +268,6 @@ class PergerakanStokModel {
         keterangan: _str(j['keterangan']),
         dibuatPada: _tgl(j['dibuat_pada']),
       );
-
-  bool get penambahan => perubahan > 0;
-  bool get koreksiManual => jenisPergerakan == 'koreksi_manual';
 }
 
 /// Orang yang meminjam galon depot (tabel `peminjam`)
@@ -368,10 +355,6 @@ class TransaksiModel {
   bool get pemasukan => tipeArusKas == 'pemasukan';
   bool get dibatalkan => status == 'dibatalkan';
   bool get bisaDibatalkan => !dibatalkan;
-
-  /// Teks ringkas untuk baris riwayat: nama produk, atau deskripsi, atau nama peminjam
-  String get judul =>
-      namaProduk ?? deskripsi ?? namaPeminjam ?? jenisAksi.label;
 }
 
 /// Notifikasi stok menipis / sparepart jatuh tempo (tabel `pengingat`)
@@ -405,5 +388,4 @@ class PengingatModel {
   );
 
   bool get stokMenipis => jenis == 'stok_menipis';
-  bool get belumDibaca => status == 'belum_dibaca';
 }

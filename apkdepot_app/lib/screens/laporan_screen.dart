@@ -1,8 +1,7 @@
-// screens/laporan_screen.dart
-// Tab "Laporan" (Laporan Operasional): Harian, Mingguan, Bulanan, Tahunan.
+// laporan_screen.dart
+// Tab Laporan: Harian, Mingguan, Bulanan, Tahunan.
 // Data dari ApiService.laporanHarian() dan ApiService.laporanRingkasan().
-// Tombol "Ekspor" membuka tautan unduhan CSV (butuh paket url_launcher):
-//   flutter pub add url_launcher
+// Tombol Ekspor -> unduhan CSV (url_launcher).
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
@@ -83,18 +82,6 @@ num _angka(dynamic v) {
 
 DateTime _hanyaTanggal(DateTime d) => DateTime(d.year, d.month, d.day);
 
-String _singkat(num n) {
-  final a = n.abs();
-  final tanda = n < 0 ? '-' : '';
-  if (a >= 1000000) {
-    final v = (a / 1000000);
-    return '$tanda${v.toStringAsFixed(v >= 10 ? 0 : 1)} jt';
-  }
-  if (a >= 1000)
-    return '$tanda${(a / 1000).toStringAsFixed(a >= 10000 ? 0 : 1)} rb';
-  return '$tanda${a.round()}';
-}
-
 class LaporanScreen extends StatefulWidget {
   const LaporanScreen({super.key});
 
@@ -118,9 +105,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
     _muat();
   }
 
-  // ------------------------------------------------------------------
   // Rentang tanggal periode terpilih
-  // ------------------------------------------------------------------
   DateTime get _senin =>
       _tanggal.subtract(Duration(days: _tanggal.weekday - 1));
 
@@ -186,7 +171,6 @@ class _LaporanScreenState extends State<LaporanScreen> {
     }
   }
 
-  // ------------------------------------------------------------------
   Future<void> _muat() async {
     final tiket = ++_tiket;
     setState(() {
@@ -241,9 +225,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
     }
   }
 
-  // ------------------------------------------------------------------
   // Data total (dari tab harian atau ringkasan)
-  // ------------------------------------------------------------------
   Map<String, dynamic>? get _sumberTotal =>
       _periode == _Periode.harian ? _harian : _ringkasan;
 
@@ -368,9 +350,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
     _Periode.tahunan => 'Tren Pemasukan Tahunan',
   };
 
-  // ==================================================================
   // TAMPILAN
-  // ==================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -717,9 +697,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
     );
   }
 
-// ------------------------------------------------------------------
   // Grafik batang buatan sendiri (tanpa paket tambahan)
-  // ------------------------------------------------------------------
   Widget _kartuGrafik() {
     final bars = _susunBar();
     num maks = 0;
@@ -867,9 +845,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
     );
   }
 
-  // ------------------------------------------------------------------
   // Daftar transaksi pada hari terpilih (hanya tab Harian)
-  // ------------------------------------------------------------------
   Widget _daftarHarian() {
     final raw = _harian?['transaksi'];
     final list = <Map<String, dynamic>>[];

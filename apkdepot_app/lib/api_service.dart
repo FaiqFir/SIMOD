@@ -1,8 +1,4 @@
-// api_service.dart
-// Satu-satunya file di Flutter yang berbicara dengan backend PHP.
-// Layar cukup memanggil fungsi di sini, contoh: await ApiService.daftarProduk();
-//
-// Pasang paket dulu:  flutter pub add http
+// Satu-satunya lapisan komunikasi dengan backend PHP.
 
 import 'dart:convert';
 
@@ -10,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import 'models.dart';
 import 'services/secure_storage_service.dart';
+import 'services/profile_image_service.dart';
 
 // Pesan error yang aman langsung ditampilkan ke pengguna
 class ApiException implements Exception {
@@ -23,8 +20,7 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  // Folder PHP di Laragon.
-  // Gunakan 10.0.2.2 untuk emulator Android agar bisa akses localhost host machine.
+  // 10.0.2.2 = localhost mesin host dari emulator Android
   static const String baseUrl = 'http://10.0.2.2:8000/apkdepot_api';
 
   // Data login (disimpan selama aplikasi terbuka)
@@ -35,9 +31,7 @@ class ApiService {
     return depot != null;
   }
 
-  // -------------------------------------------------------------------
   // Fungsi inti: kirim permintaan ke PHP dan baca balasannya
-  // -------------------------------------------------------------------
   static Future<dynamic> _kirim(
     String file,
     String aksi, {
@@ -129,19 +123,20 @@ class ApiService {
     try {
       final data = await _kirim('auth.php', 'depot_get');
       depot = DepotModel.fromJson(data);
+      // Set current user for profile image after session restored
+      ProfileImageService.instance.setCurrentUser(sesi.penggunaId);
       return true;
     } catch (e) {
       // Kalau gagal, session mungkin invalid -> hapus dan return false
       await SecureStorageService.instance.clearSession();
+      ProfileImageService.instance.setCurrentUser(null);
       pengguna = null;
       depot = null;
       return false;
     }
   }
 
-  // ===================================================================
   // LOGIN & DEPOT
-  // ===================================================================
 
   static Future<void> masuk(String namaPengguna, String kataSandi) async {
     var data = await _kirim(
@@ -152,6 +147,8 @@ class ApiService {
     );
     _simpanLogin(data);
     await _simpanKeSecureStorage(data);
+    // Set current user for profile image
+    ProfileImageService.instance.setCurrentUser(data['pengguna']['id']);
   }
 
   static Future<void> daftar({
@@ -179,11 +176,14 @@ class ApiService {
     );
     _simpanLogin(data);
     await _simpanKeSecureStorage(data);
+    // Set current user for profile image
+    ProfileImageService.instance.setCurrentUser(data['pengguna']['id']);
   }
 
   static Future<void> keluar() async {
     pengguna = null;
     depot = null;
+    ProfileImageService.instance.setCurrentUser(null);
     await SecureStorageService.instance.clearSession();
   }
 
@@ -214,9 +214,7 @@ class ApiService {
     return depot!;
   }
 
-  // ===================================================================
   // PRODUK
-  // ===================================================================
 
   static Future<List<ProdukModel>> daftarProduk({String? jenis}) async {
     var data = await _kirim(
@@ -264,9 +262,7 @@ class ApiService {
     await _kirim('produk.php', 'produk_nonaktif', post: true, data: {'id': id});
   }
 
-  // ===================================================================
   // STOK
-  // ===================================================================
 
   static Future<List<StokModel>> daftarStok() async {
     var data = await _kirim('produk.php', 'stok_list');
@@ -309,9 +305,7 @@ class ApiService {
     return StokModel.fromJson(data);
   }
 
-  // ===================================================================
   // PEMINJAM
-  // ===================================================================
 
   static Future<List<PeminjamModel>> daftarPeminjam({String? cari}) async {
     var data = await _kirim(
@@ -359,9 +353,7 @@ class ApiService {
     return PeminjamModel.fromJson(data);
   }
 
-  // ===================================================================
   // TRANSAKSI
-  // ===================================================================
 
   // dari dan sampai berformat 2026-08-30. aksi = salah satu kunci labelAksi.
   static Future<List<TransaksiModel>> riwayatTransaksi({
@@ -420,9 +412,7 @@ class ApiService {
     return TransaksiModel.fromJson(data);
   }
 
-  // ===================================================================
   // BERANDA & LAPORAN (hasilnya Map, ambil nilainya dengan hasil['kunci'])
-  // ===================================================================
 
   // Kunci: pemasukan_hari_ini, pengeluaran_hari_ini, stok_galon_kosong,
   //        stok_es, galon_dipinjam, pengingat (daftar)
@@ -454,9 +444,7 @@ class ApiService {
     return '$baseUrl/laporan.php?aksi=ekspor&id_depot=$idDepot&dari=$dari&sampai=$sampai';
   }
 
-  // ===================================================================
   // PENGINGAT
-  // ===================================================================
 
   // status = belum_dibaca, dibaca, atau selesai. Kosong = semua.
   static Future<List<PengingatModel>> daftarPengingat({String? status}) async {

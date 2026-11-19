@@ -1,11 +1,5 @@
 <?php
-// =====================================================================
-// produk.php — Produk, Stok, dan Peminjam
-// Aksi (?aksi=...):
-//   produk_list | produk_tambah | produk_ubah | produk_nonaktif
-//   stok_list | stok_riwayat | stok_koreksi
-//   peminjam_list | peminjam_tambah | peminjam_ubah
-// =====================================================================
+// produk.php — produk, stok, peminjam
 require_once __DIR__ . '/koneksi.php';
 
 const JENIS_PRODUK = ['jenis_air', 'galon_kosong', 'galon_kosong_isi', 'es', 'sparepart'];
@@ -43,7 +37,7 @@ function produkMilikDepot(string $idProduk, string $idDepot, bool $harusAktif = 
     return $p;
 }
 
-/** Validasi field produk sesuai jenisnya (spec §6.1). Mengembalikan kolom siap simpan. */
+/** Validasi field produk sesuai jenisnya. Mengembalikan kolom siap simpan. */
 function validasiProduk(string $jenis): array
 {
     $nama = wajib('nama_produk', 'Nama produk');
@@ -115,9 +109,7 @@ $pdo = db();
 
 switch ($aksi) {
 
-    // ==================================================================
     // PRODUK
-    // ==================================================================
 
     // GET id_depot, [jenis]  -> daftar produk aktif
     case 'produk_list':
@@ -211,9 +203,7 @@ switch ($aksi) {
         sukses(null);
         break;
 
-    // ==================================================================
     // STOK
-    // ==================================================================
 
     // GET -> stok produk berstok (galon kosong & es) yang aktif
     case 'stok_list':
@@ -274,9 +264,7 @@ switch ($aksi) {
         sukses(stokJson($p['id']));
         break;
 
-    // ==================================================================
     // PEMINJAM
-    // ==================================================================
 
     // GET [cari] -> cari berdasarkan nama atau alamat
     case 'peminjam_list':

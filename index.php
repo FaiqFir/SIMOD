@@ -1,6 +1,6 @@
 <?php
-// index.php — halaman cek cepat. Taruh di folder root site (yang berisi folder apkdepot_api).
-// Buka: http://apkdepot.test/   -> menampilkan status PHP, ekstensi, dan koneksi database.
+// Halaman cek cepat: status PHP, ekstensi, dan koneksi database.
+// Taruh di root site (folder yang berisi apkdepot_api).
 header('Content-Type: application/json; charset=utf-8');
 
 $hasil = [
@@ -17,7 +17,7 @@ if ($koneksi === null) {
 } elseif (!$hasil['pdo_mysql']) {
     $hasil['database'] = 'ekstensi pdo_mysql belum aktif di PHP';
 } else {
-    require_once $koneksi;   // kalau gagal konek, koneksi.php sendiri membalas pesan error
+    require_once $koneksi;   // koneksi.php membalas pesan error sendiri bila gagal
     db()->query('SELECT 1');
     $hasil['database'] = 'terhubung ke ' . DB_NAMA;
 }
